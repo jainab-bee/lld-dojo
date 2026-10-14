@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Submission {{ submission.id[:8] }} - LLD Dojo{% endblock %}
+
+{% block head_extra %}
+{% if submission.status.value == "EVALUATING" or submission.status.value == "SUBMITTED" %}
+<meta http-equiv="refresh" content="3">
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div style="margin-bottom: 8px;">
+    <a href="/problems/{{ problem.id }}">&larr; Back to {{ problem.title }}</a>
+  </div>
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+    <div>
+      <h1 class="page-title">{{ problem.title }} &middot; Attempt #{{ attempt.attempt_number }}</h1>
+      <p class="page-subtitle">Submitted on {{ submission.created_at[:19].replace('T', ' ') }} UTC</p>
+    </div>
+    <div>
+      <span class="badge badge-{{ submission.status.value|lower }}">
+        {{ submission.status.value }}
+      </span>
+    </div>
+  </div>
+</div>
+
+{% if submission.status.value == "EVALUATING" or submission.status.value == "SUBMITTED" %}
+<div class="card" style="text-align: center; padding: 40px 20px;">
+  <h2 class="card-title" style="margin-bottom: 8px;">Review in Progress</h2>
+  <p style="color: var(--text-muted); margin-bottom: 20px;">
+    Running deterministic rule checks and evaluating your design against the rubric.
+    This page updates automatically every 3 seconds.
+  </p>
+  <div style="font-family: var(--font-mono); font-size: 13px; color: var(--text-muted);">
+    Status: {{ submission.status.value }}...
+  </div>
+</div>
+
+{% elif submission.status.value == "FAILED" %}
+<div class="alert alert-danger">
+  <strong>Evaluation Error:</strong> {{ submission.error_message or "An error occurred during evaluation." }}
+</div>
+
+<div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+  <div>
+    <h3 style="font-size: 16px; margin-bottom: 4px;">Retry AI Evaluation</h3>
+    <p style="color: var(--text-muted); font-size: 14px;">
+      Rule checks were completed and saved below. You can retry the AI evaluation pipeline now.
+    </p>
+  </div>
+  <form method="POST" action="/submissions/{{ submission.id }}/retry">
+    <button type="submit" class="btn btn-primary">Retry Evaluation</button>
+  </form>
+</div>
+{% endif %}
+
+{% if evaluation and evaluation.results %}
+<div class="card" style="background: #f8fafc;">
+  <h2 class="card-title" style="margin-bottom: 6px;">Evaluation Summary</h2>
+  <p style="font-size: 14px; color: var(--text);">{{ evaluation.summary }}</p>
+</div>
+
+<div style="margin-bottom: 24px;">
+  <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 14px;">Criterion Feedback</h2>
+
+  {% for r in evaluation.results %}
+  <div class="feedback-criterion">
+    <div class="feedback-header">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="criterion-title">{{ r.criterion }}</span>
+        {% if r.source == "ai" %}
+        <span class="tag-source tag-ai">AI review</span>
+        {% else %}
+        <span class="tag-source tag-rule">rule check</span>
+        {% endif %}
+      </div>
+      <div>
+        <span class="score-display">{{ r.score }} / 5</span>
+      </div>
+    </div>
+
+    <div class="feedback-row">
+      <span class="feedback-label">Evidence:</span>
+      <span class="evidence-quote">{{ r.evidence }}</span>
+    </div>
+
+    {% if r.concern %}
+    <div class="feedback-row" style="margin-top: 8px;">
+      <span class="feedback-label">Concern:</span>
+      <span style="color: #991b1b;">{{ r.concern }}</span>
+    </div>
+    {% endif %}
+
+    {% if r.suggestion %}
+    <div class="feedback-row" style="margin-top: 8px;">
+      <span class="feedback-label">Suggestion:</span>
+      <span style="color: #1e3a8a;">{{ r.suggestion }}</span>
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 10px; font-size: 12px; color: var(--text-muted);">
+      Confidence: {{ r.confidence|capitalize }}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+  <a href="/problems/{{ problem.id }}?from_submission={{ submission.id }}" class="btn btn-primary">
+    Revise This Design
+  </a>
+  <a href="/history" class="btn btn-secondary">
+    View All Attempts
+  </a>
+</div>
+{% endif %}
+
+<!-- Collapsible or expandable view of learner's submitted design -->
+<details class="card" style="margin-top: 24px;">
+  <summary style="font-weight: 600; cursor: pointer; font-size: 14px;">
+    View Submitted Design Document
+  </summary>
+  <div style="margin-top: 16px;">
+    <pre class="evidence-quote" style="white-space: pre-wrap; font-family: var(--font-family); font-size: 14px; line-height: 1.6;">{{ submission.design_document.as_text() }}</pre>
+  </div>
+</details>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}{{ problem.title }} - LLD Dojo{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div style="margin-bottom: 8px;">
+    <a href="/">&larr; Back to all problems</a>
+  </div>
+  <div style="display: flex; align-items: baseline; gap: 12px;">
+    <h1 class="page-title">{{ problem.title }}</h1>
+    <span class="badge badge-{{ problem.difficulty|lower }}">{{ problem.difficulty }}</span>
+  </div>
+  <p class="page-subtitle">{{ problem.summary }}</p>
+</div>
+
+{% if error %}
+<div class="alert alert-danger">
+  {{ error }}
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="spec-section">
+    <h3>Functional Requirements</h3>
+    <ul class="spec-list">
+      {% for req in problem.requirements %}
+      <li>{{ req }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="spec-section">
+    <h3>Edge Cases &amp; Boundary Conditions</h3>
+    <ul class="spec-list">
+      {% for edge in problem.edge_cases %}
+      <li>{{ edge }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  {% if problem.common_pitfalls %}
+  <div class="spec-section">
+    <h3>Common Pitfalls to Avoid</h3>
+    <ul class="spec-list">
+      {% for pit in problem.common_pitfalls %}
+      <li>{{ pit }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if problem.change_request %}
+  <div class="twist-box">
+    <strong>Change Request Twist:</strong> {{ problem.change_request }}
+  </div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2 class="card-title" style="margin-bottom: 6px;">Write Your Design</h2>
+  <p class="form-hint" style="margin-bottom: 24px;">
+    Write your design below. You don't need a diagram. Split your thinking across these 5 sections so the reviewer can evaluate your structural reasoning.
+  </p>
+
+  <form method="POST" action="/problems/{{ problem.id }}/submit">
+    <input type="hidden" name="idempotency_key" value="{{ idempotency_key }}">
+
+    <div class="form-group">
+      <label class="form-label" for="assumptions">1. Assumptions &amp; Scope</label>
+      <div class="form-hint">Capacity limits, supported types, hardware interactions, or boundaries.</div>
+      <textarea
+        id="assumptions"
+        name="assumptions"
+        class="form-control"
+        placeholder="e.g. Multi-floor layout with separate vehicle spots. Ticket loss defaults to full daily rate. Concurrency is guarded at the floor entrance level."
+        required
+      >{{ doc.assumptions if doc else '' }}</textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="classes_and_responsibilities">2. Classes &amp; Responsibilities</label>
+      <div class="form-hint">Key domain entities, interfaces, and what each class manages (avoid God objects).</div>
+      <textarea
+        id="classes_and_responsibilities"
+        name="classes_and_responsibilities"
+        class="form-control"
+        placeholder="e.g. class ParkingLot coordinates floors and gates. class ParkingSpot tracks availability. class Ticket records entry timestamp. class FeeCalculator computes charges."
+        required
+      >{{ doc.classes_and_responsibilities if doc else '' }}</textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="relationships">3. Relationships &amp; Structural Design</label>
+      <div class="form-hint">Inheritance (is-a), composition (has-a), interfaces (implements), and dependencies.</div>
+      <textarea
+        id="relationships"
+        name="relationships"
+        class="form-control"
+        placeholder="e.g. ParkingLot has-a list of ParkingFloors. Car and Bus inherit from Vehicle. FeeCalculator implements PricingStrategy."
+        required
+      >{{ doc.relationships if doc else '' }}</textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="key_flow">4. Key Execution Flow</label>
+      <div class="form-hint">Step-by-step trace of the main operation from trigger to completion.</div>
+      <textarea
+        id="key_flow"
+        name="key_flow"
+        class="form-control"
+        placeholder="e.g. 1. Vehicle arrives at gate. 2. Gate asks ParkingLot for spot. 3. Nearest spot reserved. 4. Ticket printed. 5. On exit, ticket scanned and fee collected."
+        required
+      >{{ doc.key_flow if doc else '' }}</textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="tradeoffs">5. Tradeoffs &amp; Extensibility</label>
+      <div class="form-hint">Why you chose this structure over alternatives, and how it handles the change request twist.</div>
+      <textarea
+        id="tradeoffs"
+        name="tradeoffs"
+        class="form-control"
+        placeholder="e.g. We chose Strategy pattern for pricing instead of switch statements so surge pricing can be injected dynamically without altering the exit gate code."
+        required
+      >{{ doc.tradeoffs if doc else '' }}</textarea>
+    </div>
+
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <button type="submit" class="btn btn-primary">Submit Design for Evaluation</button>
+      <a href="/" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

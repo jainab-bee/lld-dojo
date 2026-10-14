@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Attempt History - LLD Dojo{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Attempt History</h1>
+  <p class="page-subtitle">Track your design revisions across problems and see how your scores and feedback evolved.</p>
+</div>
+
+{% for prob_id, group in grouped_history.items() %}
+<div class="card" style="margin-bottom: 28px;">
+  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+    <div>
+      <h2 class="card-title" style="margin-bottom: 2px;">{{ group.problem.title }}</h2>
+      <span class="badge badge-{{ group.problem.difficulty|lower }}">{{ group.problem.difficulty }}</span>
+    </div>
+    <div>
+      <a href="/problems/{{ group.problem.id }}" class="btn btn-secondary btn-sm">New Attempt</a>
+    </div>
+  </div>
+
+  {% if group.attempts %}
+  <div style="overflow-x: auto;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Attempt</th>
+          <th>Date (UTC)</th>
+          <th>Status</th>
+          <th>Scores (out of 5)</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in group.attempts %}
+        <tr>
+          <td><strong>#{{ item.attempt.attempt_number }}</strong></td>
+          <td style="color: var(--text-muted); font-size: 13px;">
+            {{ item.attempt.created_at[:16].replace('T', ' ') }}
+          </td>
+          <td>
+            {% if item.submission %}
+            <span class="badge badge-{{ item.submission.status.value|lower }}">
+              {{ item.submission.status.value }}
+            </span>
+            {% else %}
+            <span class="badge badge-submitted">Draft</span>
+            {% endif %}
+          </td>
+          <td style="font-size: 13px;">
+            {% if item.scores %}
+              {% for crit, sc in item.scores.items() %}
+                <span title="{{ crit }}" style="margin-right: 8px; color: var(--text-muted);">
+                  {{ crit[:4] }}: <strong>{{ sc }}</strong>
+                </span>
+              {% endfor %}
+            {% else %}
+              <span style="color: var(--text-muted);">Pending</span>
+            {% endif %}
+          </td>
+          <td style="text-align: right; white-space: nowrap;">
+            {% if item.submission %}
+            <a href="/submissions/{{ item.submission.id }}" class="btn btn-secondary btn-sm" style="margin-right: 6px;">
+              View Feedback
+            </a>
+            <a href="/problems/{{ group.problem.id }}?from_submission={{ item.submission.id }}" class="btn btn-primary btn-sm">
+              Revise
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Comparison selector if at least 2 attempts exist -->
+  {% if group.attempts|length >= 2 %}
+  <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+    <span style="font-size: 13px; color: var(--text-muted);">
+      Compare attempts to inspect score delta and resolved concerns:
+    </span>
+    <form method="GET" action="/compare" style="display: flex; gap: 8px; align-items: center;">
+      <select name="a" class="form-control" style="padding: 4px 8px; font-size: 13px; height: 32px;">
+        {% for it in group.attempts %}
+        <option value="{{ it.attempt.id }}">Attempt #{{ it.attempt.attempt_number }}</option>
+        {% endfor %}
+      </select>
+      <span style="font-size: 13px; color: var(--text-muted);">vs</span>
+      <select name="b" class="form-control" style="padding: 4px 8px; font-size: 13px; height: 32px;">
+        {% for it in group.attempts %}
+        <option value="{{ it.attempt.id }}" {% if loop.last %}selected{% endif %}>Attempt #{{ it.attempt.attempt_number }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-secondary btn-sm">Compare</button>
+    </form>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <p style="color: var(--text-muted); font-size: 14px; margin-top: 8px;">
+    No attempts submitted yet for this problem.
+  </p>
+  {% endif %}
+</div>
+{% endfor %}
+{% endblock %}

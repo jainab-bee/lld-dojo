@@ -1,0 +1,81 @@
+[
+  {
+    "id": "parking-lot",
+    "title": "Parking Lot System",
+    "difficulty": "Medium",
+    "summary": "Design an automated multi-floor parking lot system that assigns spots, tracks occupancy, and calculates fees.",
+    "requirements": [
+      "Support multiple vehicle types: Motorcycle, Car, Bus/Truck.",
+      "Support distinct spot types: Compact, Regular, Large, Electric Vehicle (EV).",
+      "Assign the nearest available spot on entry and free it upon exit.",
+      "Issue a parking ticket on entry with timestamp and spot details.",
+      "Calculate parking fee on exit based on duration and vehicle type.",
+      "Display real-time available spots count per floor and type."
+    ],
+    "edge_cases": [
+      "Lot is completely full when a vehicle arrives.",
+      "Vehicle stays for less than the minimum billing threshold (e.g., grace period).",
+      "Driver loses their parking ticket.",
+      "Large vehicle arrives when only scattered small spots are open.",
+      "Two vehicles arrive at the same time and only one spot is left"
+    ],
+    "common_pitfalls": [
+      "Hardcoding spot allocation logic directly inside the ParkingLot class instead of using an extensible strategy.",
+      "Not distinguishing between vehicle type and spot type (e.g., a motorcycle can park in a regular spot if compact is full).",
+      "Forgetting concurrency when multiple gates allocate spots simultaneously."
+    ],
+    "change_request": "The owner wants to introduce surge pricing based on peak entry hours and real-time occupancy percentage."
+  },
+  {
+    "id": "vending-machine",
+    "title": "Vending Machine",
+    "difficulty": "Easy",
+    "summary": "Design a stateful vending machine that accepts money, manages inventory, and dispenses items with correct change.",
+    "requirements": [
+      "Support item selection by code or shelf location.",
+      "Accept cash and coin denominations (e.g., $1, $5, quarters, dimes).",
+      "Maintain internal coin/cash inventory to dispense change.",
+      "Dispense selected item only when inserted money is greater than or equal to item price.",
+      "Return exact change to the user after item dispensation.",
+      "Allow the user to cancel transaction and receive a full refund before dispensation."
+    ],
+    "edge_cases": [
+      "Item is out of stock after code selection.",
+      "Machine lacks sufficient change to return the exact balance.",
+      "User cancels mid-transaction after inserting partial amount.",
+      "Power failure or hardware jam during physical item drop."
+    ],
+    "common_pitfalls": [
+      "Using complex boolean flags instead of a State Pattern to track idle, money inserted, dispensing, and out-of-order states.",
+      "Mixing cash collection logic with inventory management inside one giant God object.",
+      "Failing to rollback transaction balance when change cannot be made."
+    ],
+    "change_request": "The operator wants to accept contactless digital wallet payments (NFC/QR code) alongside cash."
+  },
+  {
+    "id": "elevator-system",
+    "title": "Elevator System",
+    "difficulty": "Hard",
+    "summary": "Design a controller for a bank of elevators handling passenger requests across multiple floors efficiently.",
+    "requirements": [
+      "Control multiple elevator cars servicing N floors in a commercial building.",
+      "Support external hall calls (floor number, UP or DOWN direction).",
+      "Support internal car calls (destination floor buttons).",
+      "Dispatch the most suitable elevator car for an incoming hall request.",
+      "Operate elevator car door cycle (open, wait, close) safely at arrival floor.",
+      "Track elevator car state: current floor, moving direction (UP, DOWN, IDLE), and doors."
+    ],
+    "edge_cases": [
+      "Passenger weight exceeds maximum load limit.",
+      "Emergency stop button pressed while car is in motion between floors.",
+      "All elevators are moving away from an incoming call floor.",
+      "Continuous button presses on every floor by passengers."
+    ],
+    "common_pitfalls": [
+      "Tight coupling between elevator hardware controls and the dispatch algorithm (LOOK / SCAN / FCFS).",
+      "Treating each elevator as completely independent without a central dispatcher controller.",
+      "Deadlock or starvation when calls keep getting added to opposite direction queues."
+    ],
+    "change_request": "During morning rush hour (8 AM to 10 AM), idle cars must automatically park on the ground floor instead of staying on their last drop-off floor."
+  }
+]

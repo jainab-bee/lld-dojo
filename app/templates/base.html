@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}LLD Dojo - Low-Level Design Practice{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="logo">LLD Dojo</a>
+      <nav>
+        <a href="/">Problems</a>
+        <a href="/history">Attempt History</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <div class="container">
+      LLD Practice Platform &middot; Evidence-based feedback across attempts
+    </div>
+  </footer>
+</body>
+</html>

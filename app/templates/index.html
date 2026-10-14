@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}LLD Dojo - Problems{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Practice Problems</h1>
+  <p class="page-subtitle">Pick an LLD problem, study the requirements, and structure your design.</p>
+</div>
+
+<div class="problem-grid">
+  {% for p in problems %}
+  <div class="card problem-card">
+    <div>
+      <div class="card-meta">
+        <span class="badge badge-{{ p.difficulty|lower }}">{{ p.difficulty }}</span>
+      </div>
+      <h2 class="card-title">{{ p.title }}</h2>
+      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">
+        {{ p.summary }}
+      </p>
+    </div>
+    <div>
+      <a href="/problems/{{ p.id }}" class="btn btn-primary" style="width: 100%;">Solve Problem</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

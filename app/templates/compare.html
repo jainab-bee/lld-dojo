@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Attempts - LLD Dojo{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div style="margin-bottom: 8px;">
+    <a href="/history">&larr; Back to Attempt History</a>
+  </div>
+  <h1 class="page-title">{{ problem.title }} &middot; Attempt Comparison</h1>
+  <p class="page-subtitle">
+    Comparing <strong>Attempt #{{ comparison.attempt_a_number }}</strong> with <strong>Attempt #{{ comparison.attempt_b_number }}</strong>.
+  </p>
+</div>
+
+<!-- Score Progression Table -->
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <h2 class="card-title" style="margin-bottom: 0;">Rubric Score Deltas</h2>
+    <div>
+      <span style="font-size: 14px; font-weight: 600;">
+        Net Change:
+        <span class="{% if comparison.total_score_delta > 0 %}delta-positive{% elif comparison.total_score_delta < 0 %}delta-negative{% else %}delta-neutral{% endif %}">
+          {% if comparison.total_score_delta > 0 %}+{% endif %}{{ comparison.total_score_delta }} pts
+        </span>
+      </span>
+    </div>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Criterion</th>
+        <th style="text-align: center;">Attempt #{{ comparison.attempt_a_number }}</th>
+        <th style="text-align: center;">Attempt #{{ comparison.attempt_b_number }}</th>
+        <th style="text-align: center;">Change</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for diff in comparison.criterion_diffs %}
+      <tr>
+        <td><strong>{{ diff.criterion }}</strong></td>
+        <td style="text-align: center;">{{ diff.score_a }} / 5</td>
+        <td style="text-align: center;">{{ diff.score_b }} / 5</td>
+        <td style="text-align: center;">
+          <span class="{% if diff.score_delta > 0 %}delta-positive{% elif diff.score_delta < 0 %}delta-negative{% else %}delta-neutral{% endif %}">
+            {% if diff.score_delta > 0 %}+{% endif %}{{ diff.score_delta }}
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Concern Status Sections -->
+<div class="card">
+  <h2 class="card-title" style="margin-bottom: 14px;">Concern Evolution</h2>
+
+  <!-- 1. Resolved Concerns -->
+  <div style="margin-bottom: 22px;">
+    <h3 style="font-size: 15px; font-weight: 600; color: var(--success); margin-bottom: 8px;">
+      Resolved Concerns ({{ comparison.resolved_concerns|length }})
+    </h3>
+    {% if comparison.resolved_concerns %}
+      {% for item in comparison.resolved_concerns %}
+      <div class="concern-card concern-resolved">
+        <strong>{{ item.criterion }}:</strong> {{ item.concern }}
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="color: var(--text-muted); font-size: 14px;">No concerns were marked resolved in this revision.</p>
+    {% endif %}
+  </div>
+
+  <!-- 2. Still Open Concerns -->
+  <div style="margin-bottom: 22px;">
+    <h3 style="font-size: 15px; font-weight: 600; color: var(--warning); margin-bottom: 8px;">
+      Still Open Concerns ({{ comparison.still_open_concerns|length }})
+    </h3>
+    {% if comparison.still_open_concerns %}
+      {% for item in comparison.still_open_concerns %}
+      <div class="concern-card concern-open">
+        <strong>{{ item.criterion }}:</strong> {{ item.concern }}
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="color: var(--text-muted); font-size: 14px;">No persistent concerns carried over without change.</p>
+    {% endif %}
+  </div>
+
+  <!-- 3. New Concerns -->
+  <div>
+    <h3 style="font-size: 15px; font-weight: 600; color: var(--accent); margin-bottom: 8px;">
+      Newly Surfaced Concerns ({{ comparison.new_concerns|length }})
+    </h3>
+    {% if comparison.new_concerns %}
+      {% for item in comparison.new_concerns %}
+      <div class="concern-card concern-new">
+        <strong>{{ item.criterion }}:</strong> {{ item.concern }}
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="color: var(--text-muted); font-size: 14px;">No new concerns detected in this revision.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card" style="display: flex; gap: 12px; align-items: center;">
+  <a href="/problems/{{ problem.id }}?from_submission={{ sub_b_id }}" class="btn btn-primary">
+    Revise from Attempt #{{ comparison.attempt_b_number }}
+  </a>
+  <a href="/history" class="btn btn-secondary">
+    Back to History
+  </a>
+</div>
+{% endblock %}
